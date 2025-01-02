@@ -1,70 +1,8 @@
-// import dotenv from "dotenv";
-// import express from "express";
-// import cors from "cors";
-// import { OAuth2Client } from "google-auth-library";
-// dotenv.config();
-
-// const app = express();
-// const port = 3000;
-// app.use(express.json());
-// app.use(cors());
-
-// app.post("/", async (req, res) => {
-//   res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-//   res.header("Referrer-Policy", "no-referrer-when-downgrade");
-
-//   const redirectURL = "http://127.0.0.1:3000/oauth";
-
-//   const oAuth2Client = new OAuth2Client(
-//     process.env.CLIENT_ID,
-//     process.env.CLIENT_SECRET,
-//     redirectURL
-//   );
-
-//   const authorizedUrl = oAuth2Client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: "https://www.googleaps.com/auth/userinfo.profile openid",
-//     prompt: "consent",
-//   });
-
-//   res.json({ url: authorizedUrl });
-// });
-
-// async function getUserData(access_token) {
-//   const response = await fetch(
-//     `https://www.googleapis.com/oauth2/v3/userinfo?access_token${access_token}`
-//   );
-//   const data = await response.json();
-//   console.log("data", data);
-// }
-
-// app.get("/", async (req, res) => {
-//   const code = req.query.code;
-//   try {
-//     const redirectURL = "http://127.0.0.1:3000/oauth";
-//     const oAuth2Client = new OAuth2Client(
-//       process.env.CLIENT_ID,
-//       process.env.CLIENT_SECRET,
-//       redirectURL
-//     );
-//     const res = await oAuth2Client.getToken(code);
-//     await oAuth2Client.setCredentials(res.tokens);
-//     console.log("tokken acquired");
-//     const user = oAuth2Client.credentials;
-//     console.log(user);
-//     await getUserData(user.access_token);
-//   } catch (err) {
-//     console.log("Error with Signing in with Google");
-//   }
-// });
-// app.listen(port, () =>
-//   console.log(`Server running on http://localhost:${port}`)
-// );
-
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import { OAuth2Client } from "google-auth-library";
+import connections from "./Database/connections.js";
 
 dotenv.config();
 
@@ -131,6 +69,12 @@ app.get("/oauth", async (req, res) => {
   }
 });
 
-app.listen(port, () =>
-  console.log(`Server running on http://localhost:${port}`)
-);
+app.listen(port, async () => {
+  try {
+    await connections(); // Ensure the database connects before starting the server.
+    console.log(`Server running on http://localhost:${port}`);
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
+    process.exit(1); // Exit the process if the database connection fails.
+  }
+});
