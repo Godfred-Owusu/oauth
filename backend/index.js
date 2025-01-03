@@ -11,10 +11,10 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use("/api", userRoute);
-app.use("/auth", oauthRoute);
-app.use(cors());
+app.use("/oauth", oauthRoute);
 
 // Endpoint to generate Google OAuth URL
 // app.post("/request", (req, res) => {

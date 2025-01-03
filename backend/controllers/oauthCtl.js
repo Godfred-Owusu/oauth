@@ -1,18 +1,33 @@
-// controllers/oauthController.js
-import { generateAuthUrl, handleOAuthCallback } from "../oauth.js";
+import { OAuth2Client } from "google-auth-library";
 
-// Controller to generate Google OAuth URL
-export const generateAuthUrlController = (req, res) => {
-  try {
-    const authUrl = generateAuthUrl();
-    res.json({ url: authUrl });
-  } catch (error) {
-    res.status(500).json({ message: "Error generating auth URL", error });
-  }
+export const generateAuthUrlControllerTrial = (req, res) => {
+  const redirectURL = "http://127.0.0.1:3000/oauth";
+
+  const oAuth2Client = new OAuth2Client(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    redirectURL
+  );
+
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: ["https://www.googleapis.com/auth/userinfo.profile", "openid"],
+    prompt: "consent",
+  });
+
+  res.json({ url: authUrl });
 };
 
-// Controller to handle OAuth callback
-export const oauthCallbackController = async (req, res) => {
+async function getUserData(access_token) {
+  const response = await fetch(
+    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+  );
+  const data = await response.json();
+  console.log("User data:", data);
+  return data;
+}
+
+export const oauthCallbackControllerTrial = async (req, res) => {
   const code = req.query.code;
 
   if (!code) {
@@ -20,8 +35,19 @@ export const oauthCallbackController = async (req, res) => {
   }
 
   try {
-    const { tokens, userData } = await handleOAuthCallback(code);
-    res.json({ message: "Authentication successful!", userData, tokens });
+    const redirectURL = "http://127.0.0.1:3000/oauth";
+    const oAuth2Client = new OAuth2Client(
+      process.env.CLIENT_ID,
+      process.env.CLIENT_SECRET,
+      redirectURL
+    );
+
+    const { tokens } = await oAuth2Client.getToken(code);
+    oAuth2Client.setCredentials(tokens);
+    console.log(tokens);
+    const userData = await getUserData(tokens.access_token);
+
+    res.json({ message: "Authentication successful!", userData });
   } catch (error) {
     console.error("Error during OAuth process:", error.message);
     res.status(500).send("Error during Google OAuth process.");

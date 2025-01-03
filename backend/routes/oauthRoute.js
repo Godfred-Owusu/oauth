@@ -1,16 +1,12 @@
 // routes/oauthRoutes.js
 import express from "express";
 import {
-  generateAuthUrlController,
-  oauthCallbackController,
+  generateAuthUrlControllerTrial,
+  oauthCallbackControllerTrial,
 } from "../controllers/oauthCtl.js";
 
 const router = express.Router();
 
-// Endpoint to generate Google OAuth URL
-router.post("/request", generateAuthUrlController);
-
-// OAuth callback endpoint
-router.get("/oauth", oauthCallbackController);
-
+router.post("/request", generateAuthUrlControllerTrial);
+router.get("/oauth", oauthCallbackControllerTrial);
 export default router;
