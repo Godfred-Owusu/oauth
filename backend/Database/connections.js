@@ -8,4 +8,5 @@ async function connections() {
     console.log(error);
   }
 }
+
 export default connections;
