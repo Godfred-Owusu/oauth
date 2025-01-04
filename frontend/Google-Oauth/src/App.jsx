@@ -26,7 +26,7 @@ function App() {
       <h1>Welcome to my site</h1>
       <h3>Google OAuth</h3>
       <button type="button" onClick={auth}>
-        Sign in with Google
+        Sign in with Googleqqq
       </button>
     </div>
   );

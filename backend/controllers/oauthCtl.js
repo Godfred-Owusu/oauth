@@ -1,5 +1,5 @@
+import User from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
-
 export const generateAuthUrlControllerTrial = (req, res) => {
   const redirectURL = "http://127.0.0.1:3000/oauth";
 
@@ -11,7 +11,11 @@ export const generateAuthUrlControllerTrial = (req, res) => {
 
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: ["https://www.googleapis.com/auth/userinfo.profile", "openid"],
+    scope: [
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.email",
+    ],
     prompt: "consent",
   });
 
@@ -19,12 +23,59 @@ export const generateAuthUrlControllerTrial = (req, res) => {
 };
 
 async function getUserData(access_token) {
-  const response = await fetch(
-    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
-  );
-  const data = await response.json();
-  console.log("User data:", data);
-  return data;
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+    );
+    const data = await response.json();
+    console.log("User data:", data);
+
+    const { sub: googleId, name, picture, email } = data;
+
+    if (!googleId || !email) {
+      throw new Error(
+        "Required fields (Google ID or email) are missing from user data."
+      );
+    }
+
+    // Find or create the user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        name: name || "Unknown User", // Default if name is missing
+        email,
+        googleId,
+        profilePicture: picture || null,
+        password: "", // Empty password for OAuth users
+      });
+
+      await user.save();
+      console.log("New user saved:", user);
+    } else {
+      // Update existing user if needed
+      let updated = false;
+      if (user.googleId !== googleId) {
+        user.googleId = googleId;
+        updated = true;
+      }
+      if (user.profilePicture !== picture) {
+        user.profilePicture = picture;
+        updated = true;
+      }
+      if (updated) {
+        await user.save();
+        console.log("User updated:", user);
+      }
+    }
+
+    return user;
+
+    // return data;
+  } catch (error) {
+    console.error("Error fetching or saving user data:", error.message);
+    throw new Error("Error fetching user data");
+  }
 }
 
 export const oauthCallbackControllerTrial = async (req, res) => {

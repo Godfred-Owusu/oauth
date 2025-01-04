@@ -8,5 +8,5 @@ import {
 const router = express.Router();
 
 router.post("/request", generateAuthUrlControllerTrial);
-router.get("/oauth", oauthCallbackControllerTrial);
+router.get("/", oauthCallbackControllerTrial);
 export default router;
