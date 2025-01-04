@@ -2,7 +2,7 @@ import { transport, sender } from "./mailtrap.config.js";
 
 export const sendVerificationEmail = async (email, verificationToken) => {
   const recipients = [{ email }];
-  console.log(email, verificationToken, recipients);
+
   try {
     transport
       .sendMail({

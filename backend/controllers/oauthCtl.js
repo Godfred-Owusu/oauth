@@ -1,5 +1,7 @@
 import User from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
+import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
+import { sendVerificationEmail } from "../mailtrap/emails.js";
 export const generateAuthUrlControllerTrial = (req, res) => {
   const redirectURL = "http://127.0.0.1:3000/oauth";
 
@@ -40,7 +42,9 @@ async function getUserData(access_token) {
 
     // Find or create the user
     let user = await User.findOne({ email });
-
+    const verificationToken = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
     if (!user) {
       user = new User({
         name: name || "Unknown User", // Default if name is missing
@@ -48,9 +52,13 @@ async function getUserData(access_token) {
         googleId,
         profilePicture: picture || null,
         password: "", // Empty password for OAuth users
+        verificationToken,
+        verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
       await user.save();
+
+      await sendVerificationEmail(user.email, verificationToken);
       console.log("New user saved:", user);
     } else {
       // Update existing user if needed
