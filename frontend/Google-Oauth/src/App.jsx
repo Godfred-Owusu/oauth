@@ -1,4 +1,5 @@
 import "./App.css";
+import Otp from "./component/Otp";
 
 const navigate = (url) => {
   window.location.href = url;
@@ -26,8 +27,9 @@ function App() {
       <h1>Welcome to my site</h1>
       <h3>Google OAuth</h3>
       <button type="button" onClick={auth}>
-        Sign in with Googleqqq
+        Sign in with Google
       </button>
+      <Otp />
     </div>
   );
 }

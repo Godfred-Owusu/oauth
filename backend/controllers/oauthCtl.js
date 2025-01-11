@@ -3,7 +3,7 @@ import { OAuth2Client } from "google-auth-library";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import { sendVerificationEmail } from "../mailtrap/emails.js";
 export const generateAuthUrlControllerTrial = (req, res) => {
-  const redirectURL = "http://127.0.0.1:3000/oauth";
+  const redirectURL = process.env.GOOGLE_REDIRECT_URI;
 
   const oAuth2Client = new OAuth2Client(
     process.env.CLIENT_ID,
@@ -94,7 +94,7 @@ export const oauthCallbackControllerTrial = async (req, res) => {
   }
 
   try {
-    const redirectURL = "http://127.0.0.1:3000/oauth";
+    const redirectURL = process.env.GOOGLE_REDIRECT_URI;
     const oAuth2Client = new OAuth2Client(
       process.env.CLIENT_ID,
       process.env.CLIENT_SECRET,

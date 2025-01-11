@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { OAuth2Client } from "google-auth-library";
 import connections from "./Database/connections.js";
 import userRoute from "./routes/userRoute.js";
@@ -9,10 +10,12 @@ import oauthRoute from "./routes/oauthRoute.js";
 dotenv.config();
 
 const app = express();
-const port = 3000;
+//const port = 3000;
+const port = 5000
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use("/api", userRoute);
 app.use("/oauth", oauthRoute);
 
